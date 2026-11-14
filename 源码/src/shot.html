@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>截图</title>
+<link rel="stylesheet" href="styles/shot.css">
+</head>
+<body>
+  <img class="shot-bg" id="shotBg" alt="">
+  <div class="shot-veil" id="shotVeil"></div>
+  <div class="shot-box" id="shotBox" hidden>
+    <span class="shot-size" id="shotSize"></span>
+  </div>
+  <div class="shot-bar" id="shotBar" hidden>
+    <div class="shot-bar-title">拖拽框选要提问的区域</div>
+    <div class="shot-bar-size" id="shotBarSize">0 × 0</div>
+    <button class="shot-btn ghost" id="shotRetry" type="button">重选</button>
+    <button class="shot-btn ghost" id="shotCancel" type="button">取消</button>
+    <button class="shot-btn primary" id="shotConfirm" type="button">用这张提问</button>
+  </div>
+  <div class="shot-hint" id="shotHint">按住鼠标左键框选 · Esc 取消</div>
+<script src="js/shot.js"></script>
+</body>
+</html>

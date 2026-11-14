@@ -1,0 +1,55 @@
+{
+  "name": "global-toolbox",
+  "version": "0.2.0",
+  "private": true,
+  "description": "全局工具箱 · 液态玻璃桌面工具",
+  "productName": "全局工具箱",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build:helper": "powershell -NoProfile -ExecutionPolicy Bypass -File native/build-helper.ps1",
+    "dist": "npm run build:helper && electron-builder --win portable",
+    "dist:dir": "npm run build:helper && electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "45.3.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.toolbox.global",
+    "productName": "全局工具箱",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "native/ToolboxHelper.exe",
+        "to": "native/ToolboxHelper.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "executableName": "GlobalToolbox",
+      "artifactName": "GlobalToolbox-${version}-Portable.${ext}"
+    },
+    "portable": {
+      "requestExecutionLevel": "user"
+    }
+  }
+}

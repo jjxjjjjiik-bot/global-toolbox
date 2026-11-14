@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全局工具箱</title>
+<script>
+  /* 首屏前解析主题，避免白底闪烁；Electron 主进程加载状态后会再校准一次 */
+  (function () {
+    try {
+      var pref = localStorage.getItem('toolbox.theme') || 'light';
+      var resolved = pref === 'auto'
+        ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+        : pref;
+      document.documentElement.dataset.theme = resolved === 'dark' ? 'dark' : 'light';
+    } catch (e) {
+      document.documentElement.dataset.theme = 'light';
+    }
+  })();
+</script>
+<link rel="stylesheet" href="styles/app.css">
+<link rel="stylesheet" href="styles/electron.css">
+<link rel="stylesheet" href="styles/product.css">
+</head>
+<body>
+<!-- 功能图标采用 Lucide（ISC）：assets/ui/CREDITS.md；保留原有图标尺寸与交互区域。 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
+  <path d="M7 11h10" />
+  <path d="M7 15h6" />
+  <path d="M7 7h8" /></symbol>
+  <symbol id="i-paw" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2" />
+  <circle cx="18" cy="8" r="2" />
+  <circle cx="20" cy="16" r="2" />
+  <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z" /></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+  <symbol id="i-assistant" viewBox="0 0 24 24"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  <path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1" /></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .66.39 1.26 1 1.51H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 3h6l-1.2 6.2 3.2 3.3V14H7v-1.5l3.2-3.3L9 3Z"/><path d="M12 14v7"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.8 17.8 0 0 1-3 3.7M6.3 6.3C3.5 8.2 2 12 2 12s3.5 7 10 7c1.4 0 2.6-.3 3.7-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-quote" viewBox="0 0 24 24"><path d="M17 5H3" />
+  <path d="M21 12H8" />
+  <path d="M21 19H8" />
+  <path d="M3 12v7" /></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="1.4" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="14" rx="1" />
+  <rect width="7" height="7" x="3" y="14" rx="1" /></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><path d="M12 12h.01" />
+  <path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+  <path d="M22 13a18.15 18.15 0 0 1-20 0" />
+  <rect width="20" height="14" x="2" y="6" rx="2" /></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-adjustments" viewBox="0 0 24 24"><path d="M10 5H3" />
+  <path d="M12 19H3" />
+  <path d="M14 3v4" />
+  <path d="M16 17v4" />
+  <path d="M21 12h-9" />
+  <path d="M21 19h-5" />
+  <path d="M21 5h-7" />
+  <path d="M8 10v4" />
+  <path d="M8 12H3" /></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+  <path d="M12 11h4" />
+  <path d="M12 16h4" />
+  <path d="M8 11h.01" />
+  <path d="M8 16h.01" /></symbol>
+  <symbol id="i-resize" viewBox="0 0 24 24"><path d="M20 14v6h-6M20 20l-6-6M14 20H8M20 10V4h-6"/></symbol>
+</svg>
+
+<div class="app-stage" id="appStage" aria-hidden="true">
+  <div class="stage-clip">
+    <div class="stage" id="stage">
+      <div class="stage-glow" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+
+<div class="shell-fill" id="shellFill">
+  <section class="panel is-entering" id="panel" aria-label="全局工具箱">
+    <div class="winbar" id="winbar">
+      <button class="iconbtn winbtn" id="pinBtn" type="button" title="置顶">
+        <svg class="ic"><use href="#i-pin"></use></svg>
+      </button>
+      <button class="iconbtn winbtn" id="hideBtn" type="button" title="隐藏到托盘">
+        <svg class="ic"><use href="#i-minus"></use></svg>
+      </button>
+      <button class="iconbtn winbtn winbtn-close" id="closeBtn" type="button" title="关闭窗口（保留托盘）">
+        <svg class="ic"><use href="#i-close"></use></svg>
+      </button>
+    </div>
+
+    <header class="panel-head">
+      <div class="head-left">
+        <button class="iconbtn menu-btn" id="menuBtn" type="button" title="功能菜单" aria-haspopup="menu" aria-expanded="false">
+          <svg class="ic"><use href="#i-menu"></use></svg>
+        </button>
+        <button class="iconbtn theme-btn" id="themeBtn" type="button" title="切换深浅色">
+          <svg class="ic ic-moon"><use href="#i-moon"></use></svg>
+          <svg class="ic ic-sun"><use href="#i-sun"></use></svg>
+        </button>
+        <button class="iconbtn" id="settingsBtn" type="button" title="设置">
+          <svg class="ic"><use href="#i-settings"></use></svg>
+        </button>
+      </div>
+
+      <div class="searchbox" id="searchBox">
+        <svg class="ic"><use href="#i-search"></use></svg>
+        <input id="searchInput" type="text" placeholder="搜索话术、Prompt、地址…" autocomplete="off" spellcheck="false">
+        <span class="search-enter" id="searchEnter" hidden>回车</span>
+        <button class="search-clear" id="searchClear" type="button" title="清空" hidden>
+          <svg class="ic"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+
+      <div class="head-right" aria-hidden="true"></div>
+    </header>
+
+    <nav class="tabs" id="tabs" aria-label="分组"></nav>
+
+    <ul class="list" id="list" role="listbox" aria-label="词条列表"></ul>
+
+    <div class="empty" id="empty" hidden>
+      <div class="empty-orb">
+        <svg class="ic" style="width:22px;height:22px"><use href="#i-search"></use></svg>
+      </div>
+      <div class="empty-title" id="emptyTitle">没有找到相关词条</div>
+      <div class="empty-desc" id="emptyDesc">换个关键词试试，或者新建一条。</div>
+      <button class="btn-ghost" id="emptyNewBtn" type="button">
+        <svg class="ic"><use href="#i-plus"></use></svg> 新建词条
+      </button>
+    </div>
+
+    <footer class="panel-foot">
+      <div class="foot-center">
+        <button class="btn-primary" id="newItemBtn" type="button">
+          <svg class="ic"><use href="#i-plus"></use></svg> 新建词条
+        </button>
+        <span class="foot-count" id="footCount" title="当前分组的词条数">共 0 条</span>
+      </div>
+    </footer>
+
+    <!-- 设置页 -->
+    <section class="settings" id="settings" aria-label="设置">
+      <header class="set-head">
+        <button class="iconbtn" id="settingsBack" type="button" title="返回">
+          <svg class="ic"><use href="#i-arrow-left"></use></svg>
+        </button>
+        <div class="set-title">设置</div>
+        <button class="btn-primary" id="settingsDone" type="button">完成</button>
+      </header>
+
+      <div class="set-body" id="settingsBody">
+        <section class="set-group">
+          <div class="set-kicker">外观</div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">主题</div>
+              <div class="set-desc">深色模式重配蓝黑底色，不是简单反色。</div>
+            </div>
+            <div class="seg" data-seg="theme">
+              <button type="button" data-value="light">浅色</button>
+              <button type="button" data-value="dark">深色</button>
+              <button type="button" data-value="auto">跟随系统</button>
+            </div>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">面板尺寸</div>
+              <div class="set-desc">调小更适合快速呼出，调大能一屏看到更多词条。也可以拖拽面板右下角自由缩放。<span id="panelSizeNow"></span></div>
+            </div>
+            <div class="seg" data-seg="size">
+              <button type="button" data-value="compact">紧凑</button>
+              <button type="button" data-value="standard">标准</button>
+              <button type="button" data-value="large">宽敞</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <div class="set-kicker">快捷键</div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">呼出面板</div>
+              <div class="set-desc">再按一次收起面板。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="panel"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">划词提问</div>
+              <div class="set-desc">选中任意文字后按下，直接带上下文打开 AI。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="select"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">截图提问</div>
+              <div class="set-desc">按下后拖拽框选区域，松开后再确认发送。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="shot"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">打开剪贴板记录</div>
+              <div class="set-desc">随时查看刚复制过的文字和图片。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="clipboard"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">粘贴高亮词条</div>
+              <div class="set-desc">把列表里当前高亮的一条粘到刚才的窗口。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="paste"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">上一条 / 下一条</div>
+              <div class="set-desc">在列表里移动高亮。面板内快捷键可以用方向键。</div>
+            </div>
+            <div class="btn-row">
+              <button class="hotkey-btn" type="button" data-hotkey="up"></button>
+              <button class="hotkey-btn" type="button" data-hotkey="down"></button>
+            </div>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">聚焦搜索</div>
+              <div class="set-desc">把光标放到搜索框，直接开始输入。</div>
+            </div>
+            <button class="hotkey-btn" type="button" data-hotkey="search"></button>
+          </div>
+          <div class="settings-note">点击快捷键后直接按下组合键，<b>Esc</b> 取消。全局快捷键建议带修饰键；面板内的上一条、下一条等可以直接用方向键。浏览器原型里改完立即生效；Electron 版会注册系统级热键。</div>
+        </section>
+
+        <section class="set-group">
+          <div class="set-kicker">行为</div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">关闭窗口时留在托盘</div>
+              <div class="set-desc">点关闭只隐藏窗口，程序继续在后台监听热键。</div>
+            </div>
+            <button class="switch" type="button" data-setting="closeToTray" role="switch" aria-checked="true"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">窗口置顶</div>
+              <div class="set-desc">面板始终浮在其他窗口上方。</div>
+            </div>
+            <button class="switch" type="button" data-setting="pin" role="switch" aria-checked="false"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">记录使用次数</div>
+              <div class="set-desc">点过多少次会显示在词条右侧，方便清理不常用的。</div>
+            </div>
+            <button class="switch" type="button" data-setting="recordUsage" role="switch" aria-checked="true"></button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">剪贴板记录</div>
+              <div class="set-desc">捕获复制、剪切和粘贴内容，最多保留 40 条，支持图片。</div>
+            </div>
+            <button class="switch" type="button" data-setting="clipboardWatch" role="switch" aria-checked="true"></button>
+          </div>
+        </section>
+
+        <section class="set-group" id="aiSettingsGroup">
+          <div class="set-kicker">AI 服务</div>
+          <div class="form-line">
+            <label for="aiBaseUrl">Base URL</label>
+            <input class="field" id="aiBaseUrl" type="text" spellcheck="false" autocomplete="off" placeholder="服务提供方给出的接口地址">
+          </div>
+          <div class="form-line">
+            <label for="aiApiKey">API Key</label>
+            <div class="field-wrap">
+              <input class="field" id="aiApiKey" type="password" spellcheck="false" autocomplete="off" placeholder="sk-...">
+              <button class="field-eye" id="apiKeyEye" type="button" title="显示 / 隐藏">
+                <svg class="ic"><use href="#i-eye"></use></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-line">
+            <label for="aiModel">模型</label>
+            <datalist id="aiModelOptions"></datalist><input class="field" id="aiModel" type="text" spellcheck="false" autocomplete="off" placeholder="选择接口模型，或输入模型 ID" list="aiModelOptions">
+          </div>
+          <div class="set-row" style="padding-top:8px">
+            <div class="set-desc wide" id="aiConnectionFeedback">填入服务地址和密钥后获取模型，再测试连接。密钥仅保存在本机，导出不包含密钥。</div><button class="btn-ghost" id="loadModelsBtn" type="button">获取模型</button>
+            <button class="btn-ghost" id="testApiBtn" type="button">
+              <svg class="ic"><use href="#i-refresh"></use></svg> 测试连接
+            </button>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">人设与提示词预设</div>
+              <div class="set-desc">对话框里选中的预设就是这里管理的这一套。</div>
+            </div>
+            <button class="btn-ghost" id="managePresetsBtn" type="button">
+              <svg class="ic"><use href="#i-adjustments"></use></svg> 管理预设
+            </button>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <div class="set-kicker">数据</div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">备份与迁移</div>
+              <div class="set-desc">导出 JSON 不含 API Key；导入会替换词条、分组和预设。</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-ghost" id="exportBtn" type="button">
+                <svg class="ic"><use href="#i-download"></use></svg> 导出
+              </button>
+              <button class="btn-ghost" id="importBtn" type="button">
+                <svg class="ic"><use href="#i-upload"></use></svg> 导入
+              </button>
+              <input type="file" id="importFile" accept="application/json,.json" hidden>
+            </div>
+          </div>
+          <div class="set-row">
+            <div class="set-row-main">
+              <div class="set-name">重置工具箱</div>
+              <div class="set-desc">清空本机改动，回到最初这套词条和预设。</div>
+            </div>
+            <button class="btn-ghost danger" id="resetBtn" type="button">
+              <svg class="ic"><use href="#i-refresh"></use></svg> 重置
+            </button>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <div class="set-kicker">关于</div>
+          <div class="set-name">全局工具箱 · 前端原型 v0.1.0</div>
+          <div class="set-desc" style="margin-top:6px">
+            所有内容保存在本机。窗口收起后，快捷键、剪贴板监听与桌宠仍按设置运行。
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 词条编辑 -->
+    <div class="modal-layer" id="entryLayer">
+      <div class="modal-backdrop" data-close="entry"></div>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="entryTitle">
+        <div class="m-head">
+          <div class="m-title" id="entryTitle">新建词条</div>
+          <button class="iconbtn m-close" type="button" data-close="entry" title="关闭">
+            <svg class="ic"><use href="#i-close"></use></svg>
+          </button>
+        </div>
+        <div class="m-body">
+          <div class="seg seg-wide type-seg" id="entryTypeSeg">
+            <button type="button" data-type="text">文字</button>
+            <button type="button" data-type="image">图片</button>
+          </div>
+
+          <label class="f-label" for="entryTitleInput">标题</label>
+          <input class="field" id="entryTitleInput" type="text" placeholder="给这条词条起个名字" autocomplete="off">
+
+          <div id="entryTextWrap">
+            <label class="f-label" for="entryContent">内容</label>
+            <textarea class="field textarea" id="entryContent" rows="5" placeholder="要粘贴的文字、Prompt 或地址…"></textarea>
+          </div>
+
+          <div id="entryImageWrap" hidden>
+            <label class="f-label">图片</label>
+            <div class="dropzone" id="dropzone">
+              <input type="file" id="entryFile" accept="image/*" hidden>
+              <div class="dropzone-empty">
+                <svg class="ic"><use href="#i-image"></use></svg>
+                <span>点击选择图片，或直接 Ctrl+V 粘贴</span>
+                <small>也可以把图片拖进来 · PNG / JPG / GIF / WebP</small>
+              </div>
+              <img id="entryPreview" alt="图片预览" hidden>
+            </div>
+            <div class="f-hint">图片会完整保存在本地，点击词条时直接写入剪贴板。</div>
+          </div>
+
+          <label class="f-label" for="entryGroup">分组</label>
+          <div class="select-wrap">
+            <select class="field" id="entryGroup"></select>
+            <svg class="ic"><use href="#i-chevron-down"></use></svg>
+          </div>
+        </div>
+        <div class="m-foot">
+          <button class="btn-ghost" type="button" data-close="entry">取消</button>
+          <button class="btn-primary" id="entrySave" type="button">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新建分组 -->
+    <div class="modal-layer" id="groupLayer">
+      <div class="modal-backdrop" data-close="group"></div>
+      <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="groupTitle">
+        <div class="m-head">
+          <div class="m-title" id="groupTitle">新建分组</div>
+          <button class="iconbtn m-close" type="button" data-close="group" title="关闭">
+            <svg class="ic"><use href="#i-close"></use></svg>
+          </button>
+        </div>
+        <div class="m-body">
+          <label class="f-label" for="groupNameInput">分组名称</label>
+          <input class="field" id="groupNameInput" type="text" placeholder="例如：客户回复、论文 Prompt" autocomplete="off">
+          <div class="f-hint">分组只影响面板里的筛选，不会改动词条内容。</div>
+        </div>
+        <div class="m-foot">
+          <button class="btn-ghost" type="button" data-close="group">取消</button>
+          <button class="btn-primary" id="groupSave" type="button">创建</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-grip" id="resizeGrip" title="拖动调整窗口大小" aria-label="拖动调整窗口大小">
+      <svg class="ic"><use href="#i-resize"></use></svg>
+    </div>
+  </section>
+
+  <!-- 八向窗口缩放热区：覆盖面板四条边和四个角，拖哪边就改哪边 -->
+  <div class="resize-edges" id="resizeEdges" aria-hidden="true">
+    <div class="rz rz-n" data-dir="n"></div>
+    <div class="rz rz-s" data-dir="s"></div>
+    <div class="rz rz-w" data-dir="w"></div>
+    <div class="rz rz-e" data-dir="e"></div>
+    <div class="rz rz-nw" data-dir="nw"></div>
+    <div class="rz rz-ne" data-dir="ne"></div>
+    <div class="rz rz-sw" data-dir="sw"></div>
+    <div class="rz rz-se" data-dir="se"></div>
+  </div>
+
+<div class="modal-layer" id="presetLayer"><div class="modal-backdrop" data-close="preset"></div><div class="modal modal-preset" role="dialog" aria-modal="true" aria-labelledby="presetTitle"><header class="m-head"><div><div class="m-title" id="presetTitle">人设与提示词</div><p class="preset-caption">人设决定回答方式，提示词说明这次要做什么。</p></div><button class="iconbtn m-close" type="button" data-close="preset" aria-label="关闭预设管理"><svg class="ic"><use href="#i-close"></use></svg></button></header><div class="m-body"><section class="preset-section"><div class="preset-section-head"><h3>人设</h3><button class="btn-ghost" type="button" data-new-preset="persona">新建人设</button></div><div class="preset-list" id="personaList"></div></section><section class="preset-section"><div class="preset-section-head"><h3>提示词</h3><button class="btn-ghost" type="button" data-new-preset="prompt">新建提示词</button></div><div class="preset-list" id="promptList"></div></section><form class="preset-editor" id="presetEditor" hidden><div class="preset-section-head"><h3 id="presetEditorTitle">新建人设</h3><button class="ai-link" id="presetEditorCancel" type="button">取消编辑</button></div><label class="f-label" for="presetName">名称</label><input class="field" id="presetName" maxlength="60" placeholder="例如：论文审稿人" required><label class="f-label" for="presetText">完整指令</label><textarea class="field" id="presetText" rows="6" maxlength="20000" placeholder="具体描述角色、要求和回答方式。这里的内容会实际发送给模型。" required></textarea><div class="preset-editor-foot"><span>保存后立即选用</span><button class="btn-primary" type="submit" id="presetEditorSave">保存并使用</button></div></form></div><footer class="m-foot"><button class="btn-primary" type="button" data-close="preset">完成</button></footer></div></div>  <!-- 通用确认：舞台层，任何窗口都能弹出 -->
+  <div class="modal-layer" id="confirmLayer">
+    <div class="modal-backdrop" data-close="confirm"></div>
+    <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="m-head">
+        <div class="m-title" id="confirmTitle">确认</div>
+      </div>
+      <div class="m-body">
+        <div class="confirm-text" id="confirmText"></div>
+      </div>
+      <div class="m-foot">
+        <button class="btn-ghost" id="confirmCancel" type="button">取消</button>
+        <button class="btn-primary" id="confirmOk" type="button">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 独立功能启动器 -->
+  <section class="launcher-window" id="launcherWindow" aria-label="功能菜单">
+    <header class="launcher-head">
+      <div class="launcher-brand">
+        <span class="launcher-logo">
+          <svg class="ic"><use href="#i-grid"></use></svg>
+        </span>
+        <div>
+          <div class="launcher-title">全局工具箱</div>
+          <div class="launcher-sub">常用工具，随时唤出</div>
+        </div>
+      </div>
+      <div class="launcher-actions">
+        <button class="iconbtn" id="launcherSettings" type="button" title="设置">
+          <svg class="ic"><use href="#i-settings"></use></svg>
+        </button>
+        <button class="iconbtn" id="launcherClose" type="button" title="关闭">
+          <svg class="ic"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="launcher-grid">
+      <button class="launch-card" type="button" data-launch="main">
+        <span class="launch-icon">
+          <svg class="ic"><use href="#i-message"></use></svg>
+        </span>
+        <span class="launch-title">话术面板</span>
+        <span class="launch-desc" id="homeSnippetStatus">管理常用文字和图片</span>
+        <span class="launch-foot">
+          <kbd id="launchPanelKbd">Ctrl+Shift+Space</kbd>
+          <svg class="ic"><use href="#i-chevron-right"></use></svg>
+        </span>
+      </button>
+
+      <button class="launch-card" type="button" data-launch="ai">
+        <span class="launch-icon is-ai">
+          <svg class="ic"><use href="#i-assistant"></use></svg>
+        </span>
+        <span class="launch-title">AI 助手</span>
+        <span class="launch-desc" id="homeAIStatus">提问、读图与文字处理</span>
+        <span class="launch-foot">
+          <kbd id="launchAiKbd">Alt+Q</kbd>
+          <svg class="ic"><use href="#i-chevron-right"></use></svg>
+        </span>
+      </button>
+
+      <button class="launch-card" type="button" data-launch="clip">
+        <span class="launch-icon is-clip">
+          <svg class="ic"><use href="#i-clipboard"></use></svg>
+        </span>
+        <span class="launch-title">剪贴板记录</span>
+        <span class="launch-desc" id="homeClipboardStatus">最近复制的文字与图片</span>
+        <span class="launch-foot">
+          <kbd id="launchClipKbd">Alt+V</kbd>
+          <svg class="ic"><use href="#i-chevron-right"></use></svg>
+        </span>
+      </button>
+
+      <button class="launch-card" type="button" data-launch="pets">
+        <span class="launch-icon is-pet">
+          <svg class="ic"><use href="#i-paw"></use></svg>
+        </span>
+        <span class="launch-title">桌宠</span>
+        <span class="launch-desc" id="homePetStatus">管理桌宠、原声与接话小剧场</span>
+        <span class="launch-foot">
+          <span class="launch-soon" id="homePetCount">桌宠管理</span>
+          <svg class="ic"><use href="#i-chevron-right"></use></svg>
+        </span>
+      </button>
+    </div>
+
+    <div class="launcher-foot"><kbd>Esc</kbd> 关闭 · 所有快捷键都可以在设置里改</div>
+  </section>
+
+  <!-- AI 助手独立窗口 -->
+  <section class="func-window" id="aiHubWindow" aria-label="AI 助手">
+    <header class="func-head">
+      <button class="iconbtn func-icon" type="button" data-launcher-open title="功能菜单">
+        <svg class="ic"><use href="#i-menu"></use></svg>
+      </button>
+      <div class="func-head-main">
+        <div class="func-title">AI 助手</div>
+        <div class="func-sub">划词、截图，带上下文提问</div>
+      </div>
+      <span class="page-badge" id="aiHubBadge">待配置</span>
+      <button class="iconbtn func-icon" type="button" data-window-hide title="收起窗口（保留托盘）">
+        <svg class="ic"><use href="#i-close"></use></svg>
+      </button>
+    </header>
+<div class="func-body assistant-home"><div class="assistant-intro"><h2>从一个问题开始</h2><p>直接提问，也可以带上选中的文字或截图。</p></div><div class="hub-compose"><textarea id="aiHubQuestion" rows="3" placeholder="你想解决什么问题？" aria-label="向 AI 提问"></textarea><div><span id="aiHubConnection">配置服务后即可使用</span><button class="btn-primary" type="button" id="aiPageChat">开始对话 <svg class="ic"><use href="#i-send"></use></svg></button></div></div><div class="assistant-tools"><button type="button" id="aiPageSelect"><svg class="ic"><use href="#i-quote"></use></svg><span>读取选中文字<small id="aiPageSelectHotkey">Alt+Q</small></span></button><button type="button" id="aiPageShot"><svg class="ic"><use href="#i-camera"></use></svg><span>截图提问<small id="aiPageShotHotkey">Alt+S</small></span></button></div><div class="assistant-preferences"><div class="preset-section-head"><h3>回答偏好</h3><button class="ai-link" type="button" data-manage-presets>管理回答设置</button></div><label class="f-label" for="aiHubUserContext">补充给 AI 的信息</label><textarea class="field" id="aiHubUserContext" rows="4" maxlength="8000" placeholder="补充你的身份、背景或固定回答要求"></textarea><div class="acs-row"><span>当前人设</span><b id="aiPagePersona"></b></div><div class="acs-row"><span>当前提示词</span><b id="aiPagePrompt"></b></div><div class="acs-row"><span>当前模型</span><b id="aiPageModel"></b></div></div><button class="assistant-settings-link" id="aiPageSettings" type="button"><svg class="ic"><use href="#i-settings"></use></svg>服务连接与模型设置<svg class="ic"><use href="#i-chevron-right"></use></svg></button></div>
+  </section>
+
+  <!-- AI 回答设置独立窗口 -->
+  <section class="func-window" id="aiPrefsWindow" aria-label="AI 回答设置">
+    <header class="func-head">
+      <button class="iconbtn func-icon" type="button" data-launcher-open title="功能菜单">
+        <svg class="ic"><use href="#i-menu"></use></svg>
+      </button>
+      <div class="func-head-main">
+        <div class="func-title">回答设置</div>
+        <div class="func-sub">补充信息与可复用提示词</div>
+      </div>
+      <button class="iconbtn func-icon" type="button" data-window-hide title="收起窗口（保留托盘）">
+        <svg class="ic"><use href="#i-close"></use></svg>
+      </button>
+    </header>
+    <div class="func-body ai-prefs-page">
+      <section class="set-group">
+        <div class="set-kicker">补充给 AI 的信息</div>
+        <label class="f-label" for="aiUserContextInput">固定背景、身份或回答要求</label>
+        <textarea class="field" id="aiUserContextInput" rows="7" maxlength="8000" placeholder="例如：我是自动化专业学生，回答时优先给可执行步骤，不要使用 Markdown。"></textarea>
+        <div class="f-hint">这段内容会附加到每次 AI 请求里，适合放长期有效的个人信息和回答偏好。</div>
+      </section>
+
+      <section class="set-group">
+        <div class="preset-section-head">
+          <h3>预设提示词</h3>
+          <button class="btn-ghost" id="aiPrefNewPrompt" type="button">新建提示词</button>
+        </div>
+        <div class="preset-list" id="aiPrefPromptList"></div>
+        <form class="preset-editor" id="aiPrefPromptEditor" hidden>
+          <div class="preset-section-head">
+            <h3 id="aiPrefPromptEditorTitle">新建提示词</h3>
+            <button class="ai-link" id="aiPrefPromptCancel" type="button">取消编辑</button>
+          </div>
+          <label class="f-label" for="aiPrefPromptName">名称</label>
+          <input class="field" id="aiPrefPromptName" maxlength="60" placeholder="例如：代码审查" required>
+          <label class="f-label" for="aiPrefPromptText">完整指令</label>
+          <textarea class="field" id="aiPrefPromptText" rows="7" maxlength="20000" placeholder="写下这个提示词要做的事和输出要求。" required></textarea>
+          <div class="preset-editor-foot">
+            <span>保存后会设为当前提示词</span>
+            <button class="btn-primary" type="submit">保存并使用</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <!-- 剪贴板记录独立窗口 -->
+  <section class="func-window func-clip" id="clipWindow" aria-label="剪贴板记录">
+    <header class="func-head">
+      <button class="iconbtn func-icon" type="button" data-launcher-open title="功能菜单">
+        <svg class="ic"><use href="#i-menu"></use></svg>
+      </button>
+      <div class="func-head-main">
+        <div class="func-title">剪贴板记录</div>
+        <div class="func-sub">实时抓取复制粘贴内容</div>
+      </div>
+      <span class="page-badge" id="clipBadge">实时监听</span>
+      <button class="iconbtn func-icon winbtn" id="clipPinBtn" type="button" title="置顶">
+        <svg class="ic"><use href="#i-pin"></use></svg>
+      </button>
+      <button class="iconbtn func-icon" type="button" data-window-hide title="收起窗口（保留托盘）">
+        <svg class="ic"><use href="#i-close"></use></svg>
+      </button>
+    </header>
+    <div class="func-body">
+      <div class="clip-toolbar">
+        <div class="clip-status">
+          <i class="live-dot" id="clipStatusDot"></i>
+          <span id="clipStatusText">正在监听复制与粘贴</span>
+        </div>
+        <div class="clip-actions">
+          <button class="btn-ghost" id="clipReadBtn" type="button">
+            <svg class="ic"><use href="#i-clipboard"></use></svg> 读取剪贴板
+          </button>
+          <button class="btn-ghost danger" id="clipClearBtn" type="button">
+            <svg class="ic"><use href="#i-trash"></use></svg> 清空
+          </button>
+        </div>
+      </div>
+
+      <div class="clip-watchline">
+        <div class="set-row-main">
+          <div class="set-name">实时监听</div>
+          <div class="set-desc">在后台记录新复制的内容；使用历史记录不会改变它的位置。</div>
+        </div>
+        <button class="switch" type="button" data-setting="clipboardWatch" role="switch" aria-checked="true"></button>
+      </div>
+
+      <label class="clip-search"><svg class="ic"><use href="#i-search"></use></svg><input id="clipSearch" type="search" placeholder="搜索复制过的内容" aria-label="搜索剪贴板历史"></label><div class="clip-list" id="clipList"></div>
+      <div class="clip-empty" id="clipEmpty" hidden>
+        <div class="clip-empty-orb">
+          <svg class="ic"><use href="#i-clipboard"></use></svg>
+        </div>
+        <div class="clip-empty-title">还没有剪贴板记录</div>
+        <div class="clip-empty-desc">复制一段文字，或复制一张图片，这里会自动出现。也可以点上面的「读取剪贴板」。</div>
+      </div>
+
+      <div class="settings-note">最多保留 40 条，自动去重。暂停监听不会删除已有记录。</div>
+    </div>
+
+
+  </section>
+
+  <!-- 桌宠设置 -->
+  <section class="func-window func-small" id="petWindow" aria-label="桌宠">
+    <header class="func-head">
+      <button class="iconbtn func-icon" type="button" data-launcher-open title="功能菜单">
+        <svg class="ic"><use href="#i-menu"></use></svg>
+      </button>
+      <div class="func-head-main">
+        <div class="func-title">桌宠</div>
+        <div class="func-sub">点一下说话，多套接话按顺序自动播放</div>
+      </div>
+      <button class="iconbtn func-icon" type="button" data-window-hide title="收起窗口（保留托盘）">
+        <svg class="ic"><use href="#i-close"></use></svg>
+      </button>
+    </header>
+    <div class="func-body pet-settings">
+      <div class="pet-toolbar">
+        <div class="pet-toolbar-tabs" id="petTabs">
+          <button type="button" data-pet-tab="list" class="is-active">桌宠</button>
+          <button type="button" data-pet-tab="scenes">接话小剧场</button>
+          <button type="button" data-pet-tab="add">添加</button>
+        </div>
+        <button class="pet-mini" id="petMasterBtn" type="button">显示桌宠</button>
+        <button class="pet-mini" id="petPauseBtn" type="button">暂停接话</button>
+      </div>
+
+      <div class="pet-view is-active" data-pet-view="list">
+        <div class="pet-list" id="petList"></div>
+        <p class="settings-note">点桌宠说一句话；按住拖动换位置；滚轮缩放大小。「试听」只让它自己说一句。</p>
+      </div>
+
+      <div class="pet-view" data-pet-view="scenes">
+        <div class="pet-scene-tools">
+          <p class="settings-note">点击第一句的桌宠即可整段播放；间隔为上一句结束后的停顿。同人开头的多个启用方案随机选一套。</p>
+          <button class="pet-mini" id="petSceneAdd" type="button">新建接话</button>
+        </div>
+        <div class="pet-scene-list" id="petSceneList"></div>
+      </div>
+
+      <div class="pet-view" data-pet-view="add"><div class="pet-diy-intro"><h3>做一只自己的桌宠</h3><p>上传透明形象图和原声录音，素材会复制到工具箱中。</p></div><div class="pet-diy-preview"><img id="petDraftImage" alt="桌宠形象预览" hidden><span id="petDraftPlaceholder">形象预览</span><audio id="petDraftAudio" controls hidden preload="metadata"></audio></div>
+        <div class="pet-add-form">
+          <div class="pet-add-row">
+            <span class="field-label">头像图片</span>
+            <button class="pet-mini" id="petPickAvatar" type="button">选择图片</button>
+            <span class="pet-file-note" id="petAvatarName">未选择</span>
+          </div>
+          <div class="pet-add-row">
+            <span class="field-label">原声录音</span>
+            <button class="pet-mini" id="petPickAudio" type="button">选择音频</button>
+            <span class="pet-file-note" id="petAudioName">未选择（可多选）</span>
+          </div>
+          <div class="pet-add-row">
+            <span class="field-label">名字</span>
+            <input class="field" id="petNameInput" type="text" placeholder="给你的桌宠起个名字" autocomplete="off">
+          </div>
+          <div class="pet-add-row pet-add-lines">
+            <span class="field-label">台词字幕</span>
+            <textarea class="field" id="petLinesInput" rows="3" placeholder="可选。一行一句，按顺序对应录音；不填就显示音频文件名"></textarea>
+          </div>
+          <div class="pet-add-row">
+            <button class="pet-mini" id="petCreateBtn" type="button">创建并启用</button>
+            <span class="pet-file-note">选好头像和录音就能用，点它就会随机说一句。</span>
+          </div>
+        </div>
+        <p class="settings-note">支持 wav / mp3 / m4a / ogg / webm。录音有几段就会随机说几段，想按秩序接话可以到「接话小剧场」里编排。</p>
+      </div>
+    </div>
+  </section>
+
+<section class="ai-window" id="aiWindow" role="dialog" aria-label="AI 助手"><header class="ai-head" id="aiDrag"><div class="ai-orb"><svg class="ic"><use href="#i-assistant"></use></svg></div><div class="ai-head-main"><div class="ai-title">AI 助手 <span class="ai-ctx-chip" id="aiCtxChip">对话</span></div><div class="ai-sub" id="aiSub">直接提问，或带上文字与截图</div></div><div class="ai-head-actions"><button class="iconbtn ai-icon" id="aiSettingsBtn" type="button" title="连接设置"><svg class="ic"><use href="#i-settings"></use></svg></button><button class="iconbtn ai-icon" id="aiCloseBtn" type="button" title="收起窗口"><svg class="ic"><use href="#i-close"></use></svg></button></div></header><div class="ai-body" id="aiBody"><div class="ai-context" id="aiContext" hidden><div class="ai-ctx-icon" id="aiCtxIcon"><svg class="ic"><use href="#i-quote"></use></svg></div><div class="ai-ctx-main"><div class="ai-ctx-text" id="aiCtxText"></div><div class="ai-ctx-meta" id="aiCtxMeta"></div></div><button class="ai-expand" id="aiExpand" type="button" hidden>展开</button><img class="ai-ctx-thumb" id="aiCtxThumb" alt="待分析的截图" hidden><button class="iconbtn" id="aiContextClear" type="button" title="移除此上下文"><svg class="ic"><use href="#i-close"></use></svg></button></div><div class="ai-config"><div class="ai-config-head"><span class="ai-config-label">人设</span><span class="ai-config-current" id="personaCurrent"></span><button class="ai-link" type="button" data-manage-presets>管理</button></div><div class="ai-chips" id="personaChips"></div><div class="ai-config-head"><span class="ai-config-label">提示词</span><span class="ai-config-current" id="promptCurrent"></span></div><div class="ai-chips" id="promptChips"></div><p class="ai-preset-preview" id="aiPresetPreview"></p></div><div class="ai-empty" id="aiEmpty"><svg class="ic"><use href="#i-message"></use></svg><h2>有什么想问的？</h2><p>输入问题开始对话。选择人设和提示词，让回答更符合你的需要。</p><div class="ai-empty-actions"><button class="btn-ghost" type="button" id="aiDialogSelect">读取选中文字</button><button class="btn-ghost" type="button" id="aiDialogShot">截图提问</button></div></div><section class="ai-result" id="aiResult" hidden aria-live="polite"><div class="ai-result-head"><span id="aiResultLabel">回答</span><div class="ai-result-actions"><button class="ai-link" id="aiCopyBtn" type="button">复制</button><button class="ai-link" id="aiRetryBtn" type="button">重新生成</button></div></div><div class="ai-answer" id="aiAnswer"></div></section></div><div class="ai-compose"><textarea id="aiQuestion" rows="3" placeholder="输入问题，或对选中文字、截图补充要求…" aria-label="问题与补充要求"></textarea><div class="ai-compose-foot"><span class="ai-model" id="aiModelChip">未配置模型</span><span class="ai-send-hint">Enter 发送 · Shift+Enter 换行</span><button class="ai-send" id="aiSendBtn" type="button" title="发送" aria-label="发送问题"><svg class="ic"><use href="#i-send"></use></svg></button></div></div><footer class="ai-foot"><span class="ai-status"><i class="dot is-off" id="aiDot"></i><span id="aiStatusText">请配置服务连接</span></span><button class="ai-link" id="aiFootSettings" type="button">连接设置</button></footer></section>    <div class="clip-viewer" id="clipViewer" hidden>
+      <div class="clip-viewer-backdrop" data-close-clip-viewer></div>
+      <div class="clip-viewer-card">
+        <header class="clip-viewer-head">
+          <div class="func-title" id="clipViewerTitle">记录详情</div>
+          <button class="iconbtn func-icon" id="clipViewerClose" type="button" data-close-clip-viewer title="关闭">
+            <svg class="ic"><use href="#i-close"></use></svg>
+          </button>
+        </header>
+        <div class="clip-viewer-body">
+          <div class="clip-viewer-stage" id="clipViewerStage" hidden>
+            <img id="clipViewerImg" alt="剪贴板图片">
+          </div>
+          <pre id="clipViewerText" hidden></pre>
+          <div class="clip-viewer-meta" id="clipViewerMeta"></div>
+        </div>
+        <div class="clip-viewer-controls" id="clipViewerControls" hidden>
+          <button class="clip-viewer-tool" id="clipViewerZoomOut" type="button" data-clip-viewer-zoom="out" title="缩小" aria-label="缩小图片">−</button>
+          <span class="clip-viewer-zoom-label" id="clipViewerZoomLabel" aria-live="polite">100%</span>
+          <button class="clip-viewer-tool" id="clipViewerZoomIn" type="button" data-clip-viewer-zoom="in" title="放大" aria-label="放大图片">+</button>
+          <button class="clip-viewer-fit" id="clipViewerZoomFit" type="button" data-clip-viewer-zoom="fit">适应窗口</button>
+        </div>
+        <footer class="clip-viewer-foot">
+          <button class="btn-ghost" id="clipViewerPaste" type="button">粘贴</button>
+          <button class="btn-primary" id="clipViewerCopy" type="button">
+            <svg class="ic"><use href="#i-copy"></use></svg> 复制图片
+          </button>
+        </footer>
+      </div>
+    </div>
+<!-- 词条更多菜单 -->
+  <div class="menu" id="rowMenu"></div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script src="js/platform.js"></script>
+<script src="js/liquid-lens.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
