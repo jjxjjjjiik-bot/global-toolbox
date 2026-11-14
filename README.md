@@ -2,6 +2,24 @@
 
 一款常驻 Windows 托盘的桌面效率工具，把 AI 问答、常用话术、剪贴板历史和桌宠整合到同一个随时可呼出的入口。
 
+## 界面预览
+
+<p align="center">
+  <img src="images/launcher.png" alt="全局工具箱首页" width="760">
+</p>
+
+<p align="center">首页：话术、AI、剪贴板和桌宠统一在一个入口</p>
+
+<p align="center">
+  <img src="images/panel.png" alt="全局话术面板" width="720">
+</p>
+
+<p align="center">全局话术面板：分组、搜索、常用内容与一键粘贴</p>
+
+## 下载
+
+最新便携版：[Release v0.2.0](https://github.com/jjxjjjjiik-bot/global-toolbox/releases/tag/v0.2.0)
+
 ## 运行
 
 运行环境：Windows 10 / 11 64 位。
