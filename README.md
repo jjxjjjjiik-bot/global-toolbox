@@ -26,7 +26,7 @@ Release 中的文件名：`GlobalToolbox-0.2.0-Portable.exe`
 
 运行环境：Windows 10 / 11 64 位。
 
-双击 `一键启动-全局工具箱.exe`，无需安装。首次启动会解压 Electron 运行环境，通常需要几秒。
+从 Release 下载 `GlobalToolbox-0.2.0-Portable.exe` 后双击运行，无需安装。首次启动会解压 Electron 运行环境，通常需要几秒。
 
 程序未配置商业代码签名，Windows SmartScreen 可能提示“未知发布者”。确认文件来源后，选择“更多信息”，再点击“仍要运行”。
 
