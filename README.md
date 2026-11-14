@@ -20,6 +20,8 @@
 
 最新便携版：[Release v0.2.0](https://github.com/jjxjjjjiik-bot/global-toolbox/releases/tag/v0.2.0)
 
+Release 中的文件名：`GlobalToolbox-0.2.0-Portable.exe`
+
 ## 运行
 
 运行环境：Windows 10 / 11 64 位。
